@@ -1,0 +1,88 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+</head>
+<body>
+     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-database"></i>
+                Plateforme de Données
+            </a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1 class="mb-4">Tableau de Bord des Statistiques</h1>
+
+        <!-- Cartes pour les chiffres clés -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-center text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-cubes"></i> Nombre total de jeux de données</h5>
+                        <p class="display-4">{{ total_jeux }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableaux pour les répartitions -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie"></i> Répartition par Catalogue
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Source du Catalogue</th>
+                                    <th>Nombre de jeux</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for source in repartition_par_source %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ source.source_catalogue }}</span></td>
+                                    <td>{{ source.total }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2">Aucune donnée à afficher.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                       <i class="fas fa-clock"></i> 5 Derniers Jeux de Données Modifiés
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for jeu in jeux_recents %}
+                            <li class="list-group-item">{{ jeu.titre }} <small class="text-muted d-block">{{ jeu.date_modification_source|date:"d M Y" }}</small></li>
+                        {% empty %}
+                            <li class="list-group-item">Aucun jeu de données.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center text-muted mt-5 mb-3">
+        <p>&copy; 2024 - Projet INF37407</p>
+    </footer>
+
+</body>
+</html>
