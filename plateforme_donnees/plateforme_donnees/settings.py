@@ -121,6 +121,8 @@ CORS_ALLOW_ALL_ORIGINS = True # permet de tout autoriser
 # Prefer DATABASE_URL (e.g., from Render PostgreSQL). Fallback to local MySQL for development.
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+
 # _db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
 # if _db_from_env:
 #     DATABASES = {
@@ -141,12 +143,48 @@ CORS_ALLOW_ALL_ORIGINS = True # permet de tout autoriser
 #         }
 #     }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
+
+
+# Détection automatique de PythonAnywhere
+# Vérifie si on est sur PythonAnywhere en regardant plusieurs indicateurs
+IS_PYTHONANYWHERE = (
+    'pythonanywhere.com' in os.environ.get('HTTP_HOST', '') or
+    'pythonanywhere.com' in os.environ.get('SERVER_NAME', '') or
+    (os.environ.get('PYTHONANYWHERE_USERNAME', '') and 
+     os.path.exists('/home/' + os.environ.get('PYTHONANYWHERE_USERNAME', '')))
+)
+
+# Configuration de la base de données
+_db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
+if _db_from_env:
+    # Utiliser DATABASE_URL si disponible (pour Render, Heroku, etc.)
+    DATABASES = {
+        'default': _db_from_env
     }
-}
+elif IS_PYTHONANYWHERE:
+    # Configuration pour PythonAnywhere MySQL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('DB_NAME', f"{os.environ.get('PYTHONANYWHERE_USERNAME', '')}$plateforme_donnees"),
+            'USER': os.environ.get('DB_USER', os.environ.get('PYTHONANYWHERE_USERNAME', '')),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '3306'),
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                'charset': 'utf8mb4',
+            }
+        }
+    }
+else:
+    # SQLite pour le développement local
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # Ensure correct scheme behind reverse proxy (Render)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
