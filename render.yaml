@@ -48,3 +48,8 @@ services:
 databases:
   - name: plateforme-db
     plan: free
+
+
+# .\env\Scripts\activate.ps1
+# cd plateforme_donnees
+# py manage.py runserver
